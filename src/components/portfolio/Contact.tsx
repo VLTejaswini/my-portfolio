@@ -1,6 +1,13 @@
 
-import React, { forwardRef, useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
+import React, { forwardRef, useState, useEffect } from 'react';
+import { Mail, Phone, MapPin, Send, CheckCircle, Edit, Save, X, Plus, Trash2 } from 'lucide-react';
+
+interface ContactInfo {
+  icon: string;
+  label: string;
+  value: string;
+  link: string;
+}
 
 const Contact = forwardRef<HTMLElement>((props, ref) => {
   const [formData, setFormData] = useState({
@@ -10,6 +17,46 @@ const Contact = forwardRef<HTMLElement>((props, ref) => {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [contactInfo, setContactInfo] = useState<ContactInfo[]>([
+    {
+      icon: "Mail",
+      label: "Email",
+      value: "john.doe@email.com",
+      link: "mailto:john.doe@email.com"
+    },
+    {
+      icon: "Phone",
+      label: "Phone",
+      value: "+1 (555) 123-4567",
+      link: "tel:+15551234567"
+    },
+    {
+      icon: "MapPin",
+      label: "Location",
+      value: "San Francisco, CA",
+      link: "#"
+    }
+  ]);
+  const [editContactInfo, setEditContactInfo] = useState<ContactInfo[]>(contactInfo);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('portfolioContact');
+    if (saved) {
+      const parsedData = JSON.parse(saved);
+      setContactInfo(parsedData);
+      setEditContactInfo(parsedData);
+    }
+  }, []);
+
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'Mail': return <Mail className="w-6 h-6" />;
+      case 'Phone': return <Phone className="w-6 h-6" />;
+      case 'MapPin': return <MapPin className="w-6 h-6" />;
+      default: return <Mail className="w-6 h-6" />;
+    }
+  };
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -40,7 +87,6 @@ const Contact = forwardRef<HTMLElement>((props, ref) => {
       setIsSubmitted(true);
       setFormData({ name: '', email: '', message: '' });
       
-      // Reset success message after 5 seconds
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
@@ -51,37 +97,54 @@ const Contact = forwardRef<HTMLElement>((props, ref) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
-  const contactInfo = [
-    {
-      icon: <Mail className="w-6 h-6" />,
-      label: "Email",
-      value: "john.doe@email.com",
-      link: "mailto:john.doe@email.com"
-    },
-    {
-      icon: <Phone className="w-6 h-6" />,
-      label: "Phone",
-      value: "+1 (555) 123-4567",
-      link: "tel:+15551234567"
-    },
-    {
-      icon: <MapPin className="w-6 h-6" />,
-      label: "Location",
-      value: "San Francisco, CA",
+  const handleSaveContact = () => {
+    setContactInfo(editContactInfo);
+    localStorage.setItem('portfolioContact', JSON.stringify(editContactInfo));
+    setIsEditing(false);
+  };
+
+  const handleCancelContact = () => {
+    setEditContactInfo(contactInfo);
+    setIsEditing(false);
+  };
+
+  const addContactInfo = () => {
+    setEditContactInfo([...editContactInfo, {
+      icon: "Mail",
+      label: "New Contact",
+      value: "",
       link: "#"
-    }
-  ];
+    }]);
+  };
+
+  const removeContactInfo = (index: number) => {
+    setEditContactInfo(editContactInfo.filter((_, i) => i !== index));
+  };
+
+  const updateContactInfo = (index: number, field: keyof ContactInfo, value: string) => {
+    const updated = editContactInfo.map((item, i) => 
+      i === index ? { ...item, [field]: value } : item
+    );
+    setEditContactInfo(updated);
+  };
 
   return (
     <section ref={ref} className="portfolio-section">
       <div className="max-w-4xl mx-auto px-4">
-        <h2 className="section-title">Contact Me</h2>
+        <div className="flex items-center justify-center gap-4 mb-12">
+          <h2 className="section-title">Contact Me</h2>
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="text-brown-600 hover:text-brown-800 p-2 rounded-lg hover:bg-brown-100 transition-colors"
+          >
+            <Edit className="w-5 h-5" />
+          </button>
+        </div>
         
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Contact Information */}
@@ -93,23 +156,99 @@ const Contact = forwardRef<HTMLElement>((props, ref) => {
               feel free to reach out!
             </p>
             
-            <div className="space-y-4">
-              {contactInfo.map((info, index) => (
-                <a
-                  key={index}
-                  href={info.link}
-                  className="flex items-center space-x-4 p-4 bg-white/50 rounded-lg hover:bg-white/70 transition-colors"
-                >
-                  <div className="text-brown-600">
-                    {info.icon}
+            {isEditing ? (
+              <div className="space-y-4">
+                {editContactInfo.map((info, index) => (
+                  <div key={index} className="p-4 bg-white/50 rounded-lg border border-brown-200">
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      <select
+                        value={info.icon}
+                        onChange={(e) => updateContactInfo(index, 'icon', e.target.value)}
+                        className="px-3 py-2 border border-brown-200 rounded-md focus:outline-none focus:ring-2 focus:ring-brown-500"
+                      >
+                        <option value="Mail">Mail</option>
+                        <option value="Phone">Phone</option>
+                        <option value="MapPin">Location</option>
+                      </select>
+                      <input
+                        type="text"
+                        value={info.label}
+                        onChange={(e) => updateContactInfo(index, 'label', e.target.value)}
+                        className="px-3 py-2 border border-brown-200 rounded-md focus:outline-none focus:ring-2 focus:ring-brown-500"
+                        placeholder="Label"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={info.value}
+                        onChange={(e) => updateContactInfo(index, 'value', e.target.value)}
+                        className="px-3 py-2 border border-brown-200 rounded-md focus:outline-none focus:ring-2 focus:ring-brown-500"
+                        placeholder="Value"
+                      />
+                      <input
+                        type="text"
+                        value={info.link}
+                        onChange={(e) => updateContactInfo(index, 'link', e.target.value)}
+                        className="px-3 py-2 border border-brown-200 rounded-md focus:outline-none focus:ring-2 focus:ring-brown-500"
+                        placeholder="Link"
+                      />
+                    </div>
+                    <button
+                      onClick={() => removeContactInfo(index)}
+                      className="text-red-600 hover:text-red-800 p-1 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-brown-800">{info.label}</h4>
-                    <p className="text-brown-600">{info.value}</p>
-                  </div>
-                </a>
-              ))}
-            </div>
+                ))}
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={addContactInfo}
+                    className="flex items-center gap-2 px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Contact Info
+                  </button>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveContact}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancelContact}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {contactInfo.map((info, index) => (
+                  <a
+                    key={index}
+                    href={info.link}
+                    className="flex items-center space-x-4 p-4 bg-white/50 rounded-lg hover:bg-white/70 transition-colors"
+                  >
+                    <div className="text-brown-600">
+                      {getIconComponent(info.icon)}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-brown-800">{info.label}</h4>
+                      <p className="text-brown-600">{info.value}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Contact Form */}
