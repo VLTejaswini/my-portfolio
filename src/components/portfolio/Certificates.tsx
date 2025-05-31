@@ -1,6 +1,8 @@
 
 import React, { forwardRef, useState } from 'react';
-import { Upload, Award, Download, Trash2, Eye } from 'lucide-react';
+import { Upload, Award, Download, Trash2, Eye, Edit2, Save, X, Plus } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 
 interface Certificate {
   id: string;
@@ -15,6 +17,7 @@ interface Certificate {
 }
 
 const Certificates = forwardRef<HTMLElement>((props, ref) => {
+  const [isEditing, setIsEditing] = useState(false);
   const [certificates, setCertificates] = useState<Certificate[]>([
     {
       id: '1',
@@ -36,6 +39,48 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
     }
   ]);
 
+  const [editCertificates, setEditCertificates] = useState(certificates);
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('portfolioCertificates');
+    if (saved) {
+      const parsedData = JSON.parse(saved);
+      setCertificates(parsedData);
+      setEditCertificates(parsedData);
+    }
+  }, []);
+
+  const handleSave = () => {
+    setCertificates(editCertificates);
+    localStorage.setItem('portfolioCertificates', JSON.stringify(editCertificates));
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditCertificates(certificates);
+    setIsEditing(false);
+  };
+
+  const addCertificate = () => {
+    const newCert: Certificate = {
+      id: Date.now().toString(),
+      title: "",
+      issuer: "",
+      date: ""
+    };
+    setEditCertificates(prev => [...prev, newCert]);
+  };
+
+  const updateCertificate = (id: string, field: keyof Certificate, value: string) => {
+    setEditCertificates(prev => prev.map(cert => 
+      cert.id === id ? { ...cert, [field]: value } : cert
+    ));
+  };
+
+  const removeCertificate = (id: string) => {
+    setEditCertificates(prev => prev.filter(cert => cert.id !== id));
+  };
+
   const handleFileUpload = (certId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -46,26 +91,41 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
       type: file.type
     };
 
-    setCertificates(prev => prev.map(cert => 
-      cert.id === certId
-        ? { ...cert, file: fileData }
-        : cert
-    ));
+    if (isEditing) {
+      setEditCertificates(prev => prev.map(cert => 
+        cert.id === certId
+          ? { ...cert, file: fileData }
+          : cert
+      ));
+    } else {
+      setCertificates(prev => prev.map(cert => 
+        cert.id === certId
+          ? { ...cert, file: fileData }
+          : cert
+      ));
+    }
   };
 
   const removeFile = (certId: string) => {
-    setCertificates(prev => prev.map(cert => 
-      cert.id === certId
-        ? { ...cert, file: undefined }
-        : cert
-    ));
+    if (isEditing) {
+      setEditCertificates(prev => prev.map(cert => 
+        cert.id === certId
+          ? { ...cert, file: undefined }
+          : cert
+      ));
+    } else {
+      setCertificates(prev => prev.map(cert => 
+        cert.id === certId
+          ? { ...cert, file: undefined }
+          : cert
+      ));
+    }
   };
 
   const viewFile = (file: { url: string; type: string }) => {
     if (file.type.includes('pdf')) {
       window.open(file.url, '_blank');
     } else {
-      // For images, you could open in a modal or new tab
       window.open(file.url, '_blank');
     }
   };
@@ -73,19 +133,93 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
   return (
     <section ref={ref} className="portfolio-section">
       <div className="max-w-4xl mx-auto px-4">
-        <h2 className="section-title">Certificates</h2>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="section-title">Certificates</h2>
+          {!isEditing ? (
+            <Button
+              onClick={() => setIsEditing(true)}
+              variant="outline"
+              size="sm"
+              className="text-brown-600 border-brown-300 hover:bg-brown-50"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button
+                onClick={addCertificate}
+                size="sm"
+                variant="outline"
+                className="text-brown-600 border-brown-300"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add
+              </Button>
+              <Button
+                onClick={handleSave}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </Button>
+              <Button
+                onClick={handleCancel}
+                variant="outline"
+                size="sm"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
         
         <div className="grid md:grid-cols-2 gap-6">
-          {certificates.map((cert) => (
+          {(isEditing ? editCertificates : certificates).map((cert) => (
             <div key={cert.id} className="portfolio-card">
               <div className="flex items-start space-x-4 mb-4">
                 <div className="text-brown-600 mt-1">
                   <Award className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-brown-800 text-lg mb-1">{cert.title}</h3>
-                  <p className="text-brown-600 mb-1">{cert.issuer}</p>
-                  <p className="text-brown-500 text-sm">{cert.date}</p>
+                  {isEditing ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Input
+                          placeholder="Certificate Title"
+                          value={cert.title}
+                          onChange={(e) => updateCertificate(cert.id, 'title', e.target.value)}
+                          className="flex-1 mr-2"
+                        />
+                        <Button
+                          onClick={() => removeCertificate(cert.id)}
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 border-red-300"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <Input
+                        placeholder="Issuer"
+                        value={cert.issuer}
+                        onChange={(e) => updateCertificate(cert.id, 'issuer', e.target.value)}
+                      />
+                      <Input
+                        placeholder="Date"
+                        value={cert.date}
+                        onChange={(e) => updateCertificate(cert.id, 'date', e.target.value)}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className="font-bold text-brown-800 text-lg mb-1">{cert.title}</h3>
+                      <p className="text-brown-600 mb-1">{cert.issuer}</p>
+                      <p className="text-brown-500 text-sm">{cert.date}</p>
+                    </>
+                  )}
                 </div>
               </div>
 

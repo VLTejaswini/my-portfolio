@@ -1,6 +1,9 @@
 
 import React, { forwardRef, useState } from 'react';
-import { Upload, File, Download, Trash2, ExternalLink } from 'lucide-react';
+import { Upload, File, Download, Trash2, ExternalLink, Edit2, Save, X, Plus } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 interface ProjectFile {
   id: string;
@@ -21,6 +24,7 @@ interface Project {
 }
 
 const Projects = forwardRef<HTMLElement>((props, ref) => {
+  const [isEditing, setIsEditing] = useState(false);
   const [projects, setProjects] = useState<Project[]>([
     {
       id: '1',
@@ -41,6 +45,56 @@ const Projects = forwardRef<HTMLElement>((props, ref) => {
     }
   ]);
 
+  const [editProjects, setEditProjects] = useState(projects);
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('portfolioProjects');
+    if (saved) {
+      const parsedData = JSON.parse(saved);
+      setProjects(parsedData);
+      setEditProjects(parsedData);
+    }
+  }, []);
+
+  const handleSave = () => {
+    setProjects(editProjects);
+    localStorage.setItem('portfolioProjects', JSON.stringify(editProjects));
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditProjects(projects);
+    setIsEditing(false);
+  };
+
+  const addProject = () => {
+    const newProject: Project = {
+      id: Date.now().toString(),
+      title: "",
+      description: "",
+      technologies: [],
+      files: [],
+      demoUrl: "",
+      githubUrl: ""
+    };
+    setEditProjects(prev => [...prev, newProject]);
+  };
+
+  const updateProject = (id: string, field: keyof Project, value: string | string[]) => {
+    setEditProjects(prev => prev.map(project => 
+      project.id === id ? { ...project, [field]: value } : project
+    ));
+  };
+
+  const removeProject = (id: string) => {
+    setEditProjects(prev => prev.filter(project => project.id !== id));
+  };
+
+  const updateTechnologies = (id: string, techString: string) => {
+    const technologies = techString.split(',').map(tech => tech.trim()).filter(tech => tech);
+    updateProject(id, 'technologies', technologies);
+  };
+
   const handleFileUpload = (projectId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
@@ -54,20 +108,36 @@ const Projects = forwardRef<HTMLElement>((props, ref) => {
         url: URL.createObjectURL(file)
       };
 
-      setProjects(prev => prev.map(project => 
-        project.id === projectId
-          ? { ...project, files: [...project.files, newFile] }
-          : project
-      ));
+      if (isEditing) {
+        setEditProjects(prev => prev.map(project => 
+          project.id === projectId
+            ? { ...project, files: [...project.files, newFile] }
+            : project
+        ));
+      } else {
+        setProjects(prev => prev.map(project => 
+          project.id === projectId
+            ? { ...project, files: [...project.files, newFile] }
+            : project
+        ));
+      }
     });
   };
 
   const removeFile = (projectId: string, fileId: string) => {
-    setProjects(prev => prev.map(project => 
-      project.id === projectId
-        ? { ...project, files: project.files.filter(f => f.id !== fileId) }
-        : project
-    ));
+    if (isEditing) {
+      setEditProjects(prev => prev.map(project => 
+        project.id === projectId
+          ? { ...project, files: project.files.filter(f => f.id !== fileId) }
+          : project
+      ));
+    } else {
+      setProjects(prev => prev.map(project => 
+        project.id === projectId
+          ? { ...project, files: project.files.filter(f => f.id !== fileId) }
+          : project
+      ));
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -81,50 +151,135 @@ const Projects = forwardRef<HTMLElement>((props, ref) => {
   return (
     <section ref={ref} className="portfolio-section">
       <div className="max-w-6xl mx-auto px-4">
-        <h2 className="section-title">Projects</h2>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="section-title">Projects</h2>
+          {!isEditing ? (
+            <Button
+              onClick={() => setIsEditing(true)}
+              variant="outline"
+              size="sm"
+              className="text-brown-600 border-brown-300 hover:bg-brown-50"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button
+                onClick={addProject}
+                size="sm"
+                variant="outline"
+                className="text-brown-600 border-brown-300"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add
+              </Button>
+              <Button
+                onClick={handleSave}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </Button>
+              <Button
+                onClick={handleCancel}
+                variant="outline"
+                size="sm"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
         
         <div className="grid lg:grid-cols-2 gap-6">
-          {projects.map((project) => (
+          {(isEditing ? editProjects : projects).map((project) => (
             <div key={project.id} className="portfolio-card">
-              <h3 className="font-bold text-brown-800 text-xl mb-3">{project.title}</h3>
-              <p className="text-brown-600 mb-4">{project.description}</p>
-              
-              <div className="mb-4">
-                <h4 className="font-semibold text-brown-700 mb-2">Technologies:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {project.technologies.map((tech, index) => (
-                    <span key={index} className="bg-brown-100 text-brown-700 px-3 py-1 rounded-full text-sm">
-                      {tech}
-                    </span>
-                  ))}
+              {isEditing ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Input
+                      placeholder="Project Title"
+                      value={project.title}
+                      onChange={(e) => updateProject(project.id, 'title', e.target.value)}
+                      className="flex-1 mr-2"
+                    />
+                    <Button
+                      onClick={() => removeProject(project.id)}
+                      size="sm"
+                      variant="outline"
+                      className="text-red-600 border-red-300"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <Textarea
+                    placeholder="Project description..."
+                    value={project.description}
+                    onChange={(e) => updateProject(project.id, 'description', e.target.value)}
+                    rows={3}
+                  />
+                  <Input
+                    placeholder="Technologies (comma-separated)"
+                    value={project.technologies.join(', ')}
+                    onChange={(e) => updateTechnologies(project.id, e.target.value)}
+                  />
+                  <Input
+                    placeholder="Demo URL (optional)"
+                    value={project.demoUrl || ''}
+                    onChange={(e) => updateProject(project.id, 'demoUrl', e.target.value)}
+                  />
+                  <Input
+                    placeholder="GitHub URL (optional)"
+                    value={project.githubUrl || ''}
+                    onChange={(e) => updateProject(project.id, 'githubUrl', e.target.value)}
+                  />
                 </div>
-              </div>
+              ) : (
+                <>
+                  <h3 className="font-bold text-brown-800 text-xl mb-3">{project.title}</h3>
+                  <p className="text-brown-600 mb-4">{project.description}</p>
+                  
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-brown-700 mb-2">Technologies:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {project.technologies.map((tech, index) => (
+                        <span key={index} className="bg-brown-100 text-brown-700 px-3 py-1 rounded-full text-sm">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
 
-              {(project.demoUrl || project.githubUrl) && (
-                <div className="mb-4 flex gap-2">
-                  {project.demoUrl && (
-                    <a
-                      href={project.demoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 bg-brown-600 text-white px-4 py-2 rounded hover:bg-brown-700 transition-colors"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Demo
-                    </a>
+                  {(project.demoUrl || project.githubUrl) && (
+                    <div className="mb-4 flex gap-2">
+                      {project.demoUrl && (
+                        <a
+                          href={project.demoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 bg-brown-600 text-white px-4 py-2 rounded hover:bg-brown-700 transition-colors"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Demo
+                        </a>
+                      )}
+                      {project.githubUrl && (
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          GitHub
+                        </a>
+                      )}
+                    </div>
                   )}
-                  {project.githubUrl && (
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      GitHub
-                    </a>
-                  )}
-                </div>
+                </>
               )}
 
               <div className="border-t border-brown-200 pt-4">
