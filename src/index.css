@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +36,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -98,4 +92,105 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom Portfolio Styles */
+.portfolio-container {
+  background-image: 
+    linear-gradient(45deg, #8B4513 25%, transparent 25%), 
+    linear-gradient(-45deg, #8B4513 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #8B4513 75%), 
+    linear-gradient(-45deg, transparent 75%, #8B4513 75%);
+  background-size: 60px 60px;
+  background-position: 0 0, 0 30px, 30px -30px, -30px 0px;
+  background-color: #A0522D;
+  min-height: 100vh;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, rgba(139, 69, 19, 0.9) 0%, rgba(160, 82, 45, 0.8) 100%);
+}
+
+.portfolio-section {
+  @apply py-20;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  margin: 0 1rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.section-title {
+  @apply text-4xl font-bold text-center mb-12;
+  color: #8B4513;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.portfolio-card {
+  @apply bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-white/20;
+  transition: all 0.3s ease;
+}
+
+.portfolio-card:hover {
+  @apply shadow-xl scale-105;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Brown color utilities */
+.text-brown-50 { color: #fdf8f6; }
+.text-brown-100 { color: #f7edda; }
+.text-brown-200 { color: #eddbba; }
+.text-brown-300 { color: #ddbf94; }
+.text-brown-400 { color: #ca9d6b; }
+.text-brown-500 { color: #b87333; }
+.text-brown-600 { color: #8B4513; }
+.text-brown-700 { color: #744310; }
+.text-brown-800 { color: #5d320c; }
+.text-brown-900 { color: #4a2209; }
+
+.bg-brown-50 { background-color: #fdf8f6; }
+.bg-brown-100 { background-color: #f7edda; }
+.bg-brown-200 { background-color: #eddbba; }
+.bg-brown-300 { background-color: #ddbf94; }
+.bg-brown-400 { background-color: #ca9d6b; }
+.bg-brown-500 { background-color: #b87333; }
+.bg-brown-600 { background-color: #8B4513; }
+.bg-brown-700 { background-color: #744310; }
+.bg-brown-800 { background-color: #5d320c; }
+.bg-brown-900 { background-color: #4a2209; }
+
+.border-brown-200 { border-color: #eddbba; }
+.border-brown-300 { border-color: #ddbf94; }
+.border-brown-500 { border-color: #b87333; }
+
+.hover\:bg-brown-100:hover { background-color: #f7edda; }
+.hover\:bg-brown-200:hover { background-color: #eddbba; }
+.hover\:bg-brown-600:hover { background-color: #744310; }
+.hover\:bg-brown-700:hover { background-color: #5d320c; }
+.hover\:text-brown-800:hover { color: #5d320c; }
+
+.focus\:ring-brown-500:focus { 
+  --tw-ring-color: #b87333;
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.portfolio-card {
+  animation: fadeInUp 0.6s ease-out;
 }
