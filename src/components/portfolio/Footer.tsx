@@ -22,7 +22,7 @@ const Footer = () => {
     {
       icon: <Mail className="w-5 h-5" />,
       label: "Email",
-      url: "mailto:john.doe@email.com"
+      url: "mailto:vuddantilakshmitejaswini@email.com"
     }
   ];
 
@@ -31,8 +31,8 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-6 md:mb-0">
-            <h3 className="text-2xl font-bold mb-2">John Doe</h3>
-            <p className="text-brown-200">Full Stack Developer</p>
+            <h3 className="text-2xl font-bold mb-2">Vuddanti Lakshmi Tejaswini</h3>
+            <p className="text-brown-200">CSM student</p>
           </div>
           
           <div className="flex space-x-4">
