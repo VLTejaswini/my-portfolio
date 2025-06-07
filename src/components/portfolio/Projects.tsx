@@ -1,6 +1,6 @@
 
 import React, { forwardRef, useState } from 'react';
-import { Upload, File, Download, Trash2, ExternalLink, Edit2, Save, X, Plus } from 'lucide-react';
+import { Upload, File, Download, Trash2, ExternalLink, Edit2, Save, X, Plus, Folder } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
@@ -103,6 +103,35 @@ const Projects = forwardRef<HTMLElement>((props, ref) => {
       const newFile: ProjectFile = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         name: file.name,
+        type: file.type,
+        size: file.size,
+        url: URL.createObjectURL(file)
+      };
+
+      if (isEditing) {
+        setEditProjects(prev => prev.map(project => 
+          project.id === projectId
+            ? { ...project, files: [...project.files, newFile] }
+            : project
+        ));
+      } else {
+        setProjects(prev => prev.map(project => 
+          project.id === projectId
+            ? { ...project, files: [...project.files, newFile] }
+            : project
+        ));
+      }
+    });
+  };
+
+  const handleFolderUpload = (projectId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      const newFile: ProjectFile = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        name: file.webkitRelativePath || file.name, // Use relative path to show folder structure
         type: file.type,
         size: file.size,
         url: URL.createObjectURL(file)
@@ -285,24 +314,42 @@ const Projects = forwardRef<HTMLElement>((props, ref) => {
               <div className="border-t border-brown-200 pt-4">
                 <h4 className="font-semibold text-brown-700 mb-3">Project Files:</h4>
                 
-                <label className="flex items-center justify-center gap-2 bg-brown-100 hover:bg-brown-200 text-brown-700 px-4 py-3 rounded-lg cursor-pointer transition-colors mb-4 border-2 border-dashed border-brown-300">
-                  <Upload className="w-5 h-5" />
-                  Upload Files (Code, Docs, etc.)
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) => handleFileUpload(project.id, e)}
-                    className="hidden"
-                    accept=".zip,.rar,.tar.gz,.js,.html,.css,.py,.java,.cpp,.pdf,.txt,.md"
-                  />
-                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                  <label className="flex items-center justify-center gap-2 bg-brown-100 hover:bg-brown-200 text-brown-700 px-4 py-3 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-brown-300">
+                    <Upload className="w-5 h-5" />
+                    Upload Files
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => handleFileUpload(project.id, e)}
+                      className="hidden"
+                      accept=".zip,.rar,.tar.gz,.js,.html,.css,.py,.java,.cpp,.pdf,.txt,.md,.json,.xml,.yml,.yaml"
+                    />
+                  </label>
+
+                  <label className="flex items-center justify-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-3 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-blue-300">
+                    <Folder className="w-5 h-5" />
+                    Upload Folder
+                    <input
+                      type="file"
+                      multiple
+                      webkitdirectory=""
+                      onChange={(e) => handleFolderUpload(project.id, e)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
 
                 {project.files.length > 0 && (
                   <div className="space-y-2">
                     {project.files.map((file) => (
                       <div key={file.id} className="flex items-center justify-between bg-brown-50 p-3 rounded">
                         <div className="flex items-center gap-3">
-                          <File className="w-4 h-4 text-brown-600" />
+                          {file.name.includes('/') ? (
+                            <Folder className="w-4 h-4 text-blue-600" />
+                          ) : (
+                            <File className="w-4 h-4 text-brown-600" />
+                          )}
                           <div>
                             <p className="text-sm font-medium text-brown-800">{file.name}</p>
                             <p className="text-xs text-brown-500">{formatFileSize(file.size)}</p>
