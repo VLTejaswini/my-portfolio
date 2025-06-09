@@ -22,7 +22,17 @@ interface Project {
   githubUrl?: string;
 }
 
-const Projects = forwardRef<HTMLElement>((props, ref) => {
+interface ProfileData {
+  name: string;
+  bio: string;
+  profileImage: string;
+}
+
+interface ProjectsProps {
+  profileData: ProfileData;
+}
+
+const Projects = forwardRef<HTMLElement, ProjectsProps>(({ profileData }, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [projects, setProjects] = useState<Project[]>([
     {
@@ -151,7 +161,7 @@ const Projects = forwardRef<HTMLElement>((props, ref) => {
     <section ref={ref} className="portfolio-section">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="section-title">Projects</h2>
+          <h2 className="section-title">Projects by {profileData.name}</h2>
           {!isEditing ? (
             <Button
               onClick={() => setIsEditing(true)}

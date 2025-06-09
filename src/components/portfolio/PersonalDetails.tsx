@@ -10,7 +10,17 @@ interface Degree {
   year: string;
 }
 
-const PersonalDetails = forwardRef<HTMLElement>((props, ref) => {
+interface ProfileData {
+  name: string;
+  bio: string;
+  profileImage: string;
+}
+
+interface PersonalDetailsProps {
+  profileData: ProfileData;
+}
+
+const PersonalDetails = forwardRef<HTMLElement, PersonalDetailsProps>(({ profileData }, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [details, setDetails] = useState([
     {
@@ -106,7 +116,7 @@ const PersonalDetails = forwardRef<HTMLElement>((props, ref) => {
     <section ref={ref} className="portfolio-section">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="section-title">Personal Details</h2>
+          <h2 className="section-title">Personal Details - {profileData.name}</h2>
           {!isEditing ? (
             <Button
               onClick={() => setIsEditing(true)}

@@ -48,10 +48,16 @@ const Portfolio = () => {
           profileData={profileData}
           setProfileData={setProfileData}
         />
-        <PersonalDetails ref={sectionRefs.personal} />
+        <PersonalDetails 
+          ref={sectionRefs.personal} 
+          profileData={profileData}
+        />
         <Skills ref={sectionRefs.skills} />
         <Experience ref={sectionRefs.experience} />
-        <Projects ref={sectionRefs.projects} />
+        <Projects 
+          ref={sectionRefs.projects}
+          profileData={profileData}
+        />
         <Certificates ref={sectionRefs.certificates} />
         <Achievements ref={sectionRefs.achievements} />
         <Resume ref={sectionRefs.resume} />
