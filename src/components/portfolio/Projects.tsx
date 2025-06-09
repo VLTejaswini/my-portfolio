@@ -1,3 +1,4 @@
+
 import React, { forwardRef, useState } from 'react';
 import { Upload, File, Download, Trash2, ExternalLink, Edit2, Save, X, Plus } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -161,7 +162,7 @@ const Projects = forwardRef<HTMLElement, ProjectsProps>(({ profileData }, ref) =
     <section ref={ref} className="portfolio-section">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="section-title">Projects by {profileData.name}</h2>
+          <h2 className="section-title">Projects</h2>
           {!isEditing ? (
             <Button
               onClick={() => setIsEditing(true)}
