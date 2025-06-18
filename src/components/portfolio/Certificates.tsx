@@ -240,11 +240,11 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
                 </CollapsibleTrigger>
                 
                 <CollapsibleContent className="px-4 pb-4">
-                  {/* Upload Area for this category */}
+                  {/* Upload Area for this category - now supports multiple files */}
                   <label className="flex flex-col items-center justify-center gap-3 bg-brown-50 hover:bg-brown-100 text-brown-700 p-6 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-brown-300 mb-4">
                     <Upload className="w-6 h-6" />
                     <div className="text-center">
-                      <p className="font-medium">Upload files to {category.name}</p>
+                      <p className="font-medium">Upload multiple files to {category.name}</p>
                       <p className="text-sm text-brown-500">Select multiple PDF, JPG, PNG files</p>
                     </div>
                     <input
