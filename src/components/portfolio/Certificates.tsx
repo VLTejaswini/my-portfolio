@@ -1,16 +1,9 @@
 
 import React, { forwardRef, useState } from 'react';
-import { Upload, Award, Download, Trash2, Eye, Edit2, Save, X, Plus, FileText, FolderOpen } from 'lucide-react';
+import { Upload, Download, Trash2, Eye, Edit2, Save, X, FileText, FolderOpen } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-
-interface Certificate {
-  id: string;
-  title: string;
-  issuer: string;
-  date: string;
-}
 
 interface CertificateFile {
   id: string;
@@ -29,26 +22,6 @@ interface CertificateCategory {
 
 const Certificates = forwardRef<HTMLElement>((props, ref) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [certificates, setCertificates] = useState<Certificate[]>([
-    {
-      id: '1',
-      title: 'React Developer Certification',
-      issuer: 'Meta',
-      date: '2023'
-    },
-    {
-      id: '2',
-      title: 'AWS Solutions Architect',
-      issuer: 'Amazon Web Services',
-      date: '2023'
-    },
-    {
-      id: '3',
-      title: 'Full Stack Web Development',
-      issuer: 'freeCodeCamp',
-      date: '2022'
-    }
-  ]);
 
   const [categories, setCategories] = useState<CertificateCategory[]>([
     {
@@ -77,54 +50,33 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
     }
   ]);
 
-  const [editCertificates, setEditCertificates] = useState(certificates);
+  const [editCategories, setEditCategories] = useState(categories);
 
   React.useEffect(() => {
-    const saved = localStorage.getItem('portfolioCertificates');
     const savedCategories = localStorage.getItem('portfolioCertificateCategories');
-    
-    if (saved) {
-      const parsedData = JSON.parse(saved);
-      setCertificates(parsedData);
-      setEditCertificates(parsedData);
-    }
     
     if (savedCategories) {
       const parsedCategories = JSON.parse(savedCategories);
       setCategories(parsedCategories);
+      setEditCategories(parsedCategories);
     }
   }, []);
 
   const handleSave = () => {
-    setCertificates(editCertificates);
-    localStorage.setItem('portfolioCertificates', JSON.stringify(editCertificates));
-    localStorage.setItem('portfolioCertificateCategories', JSON.stringify(categories));
+    setCategories(editCategories);
+    localStorage.setItem('portfolioCertificateCategories', JSON.stringify(editCategories));
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditCertificates(certificates);
+    setEditCategories(categories);
     setIsEditing(false);
   };
 
-  const addCertificate = () => {
-    const newCert: Certificate = {
-      id: Date.now().toString(),
-      title: "",
-      issuer: "",
-      date: ""
-    };
-    setEditCertificates(prev => [...prev, newCert]);
-  };
-
-  const updateCertificate = (id: string, field: keyof Certificate, value: string) => {
-    setEditCertificates(prev => prev.map(cert => 
-      cert.id === id ? { ...cert, [field]: value } : cert
+  const updateCategoryName = (id: string, name: string) => {
+    setEditCategories(prev => prev.map(category => 
+      category.id === id ? { ...category, name } : category
     ));
-  };
-
-  const removeCertificate = (id: string) => {
-    setEditCertificates(prev => prev.filter(cert => cert.id !== id));
   };
 
   const handleCategoryFileUpload = (categoryId: string, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,7 +91,8 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
       uploadDate: new Date().toLocaleDateString()
     }));
 
-    setCategories(prev => prev.map(category => 
+    const updateCategories = isEditing ? setEditCategories : setCategories;
+    updateCategories(prev => prev.map(category => 
       category.id === categoryId 
         ? { ...category, files: [...category.files, ...newFiles] }
         : category
@@ -147,7 +100,8 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
   };
 
   const removeFileFromCategory = (categoryId: string, fileId: string) => {
-    setCategories(prev => prev.map(category => 
+    const updateCategories = isEditing ? setEditCategories : setCategories;
+    updateCategories(prev => prev.map(category => 
       category.id === categoryId 
         ? { ...category, files: category.files.filter(file => file.id !== fileId) }
         : category
@@ -155,7 +109,8 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
   };
 
   const toggleCategory = (categoryId: string) => {
-    setCategories(prev => prev.map(category => 
+    const updateCategories = isEditing ? setEditCategories : setCategories;
+    updateCategories(prev => prev.map(category => 
       category.id === categoryId 
         ? { ...category, isOpen: !category.isOpen }
         : category
@@ -169,6 +124,8 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
       window.open(file.url, '_blank');
     }
   };
+
+  const currentCategories = isEditing ? editCategories : categories;
 
   return (
     <section ref={ref} className="portfolio-section">
@@ -187,15 +144,6 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
             </Button>
           ) : (
             <div className="flex gap-2">
-              <Button
-                onClick={addCertificate}
-                size="sm"
-                variant="outline"
-                className="text-brown-600 border-brown-300"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add
-              </Button>
               <Button
                 onClick={handleSave}
                 size="sm"
@@ -217,19 +165,28 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
         </div>
         
         {/* Categorized Certificate Upload Areas */}
-        <div className="space-y-6 mb-8">
+        <div className="space-y-6">
           <h3 className="font-bold text-brown-800 text-xl mb-4 flex items-center">
             <FolderOpen className="w-6 h-6 mr-2" />
             Certificate Categories
           </h3>
           
-          {categories.map((category) => (
+          {currentCategories.map((category) => (
             <div key={category.id} className="portfolio-card">
               <Collapsible open={category.isOpen} onOpenChange={() => toggleCategory(category.id)}>
                 <CollapsibleTrigger className="flex items-center justify-between w-full p-4 text-left hover:bg-brown-50 rounded-lg transition-colors">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 flex-1">
                     <FolderOpen className="w-5 h-5 text-brown-600" />
-                    <h4 className="font-semibold text-brown-800 text-lg">{category.name}</h4>
+                    {isEditing ? (
+                      <Input
+                        value={category.name}
+                        onChange={(e) => updateCategoryName(category.id, e.target.value)}
+                        className="font-semibold text-brown-800 text-lg border-none p-0 h-auto focus:ring-0 bg-transparent"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      <h4 className="font-semibold text-brown-800 text-lg">{category.name}</h4>
+                    )}
                     <span className="text-sm text-brown-500 bg-brown-100 px-2 py-1 rounded-full">
                       {category.files.length} files
                     </span>
@@ -240,7 +197,7 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
                 </CollapsibleTrigger>
                 
                 <CollapsibleContent className="px-4 pb-4">
-                  {/* Upload Area for this category - now supports multiple files */}
+                  {/* Upload Area for this category - supports multiple files */}
                   <label className="flex flex-col items-center justify-center gap-3 bg-brown-50 hover:bg-brown-100 text-brown-700 p-6 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-brown-300 mb-4">
                     <Upload className="w-6 h-6" />
                     <div className="text-center">
@@ -300,57 +257,6 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
                   )}
                 </CollapsibleContent>
               </Collapsible>
-            </div>
-          ))}
-        </div>
-        
-        {/* Certificate Details */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {(isEditing ? editCertificates : certificates).map((cert) => (
-            <div key={cert.id} className="portfolio-card">
-              <div className="flex items-start space-x-4">
-                <div className="text-brown-600 mt-1">
-                  <Award className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  {isEditing ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Input
-                          placeholder="Certificate Title"
-                          value={cert.title}
-                          onChange={(e) => updateCertificate(cert.id, 'title', e.target.value)}
-                          className="flex-1 mr-2"
-                        />
-                        <Button
-                          onClick={() => removeCertificate(cert.id)}
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 border-red-300"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <Input
-                        placeholder="Issuer"
-                        value={cert.issuer}
-                        onChange={(e) => updateCertificate(cert.id, 'issuer', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Date"
-                        value={cert.date}
-                        onChange={(e) => updateCertificate(cert.id, 'date', e.target.value)}
-                      />
-                    </div>
-                  ) : (
-                    <>
-                      <h3 className="font-bold text-brown-800 text-lg mb-1">{cert.title}</h3>
-                      <p className="text-brown-600 mb-1">{cert.issuer}</p>
-                      <p className="text-brown-500 text-sm">{cert.date}</p>
-                    </>
-                  )}
-                </div>
-              </div>
             </div>
           ))}
         </div>
