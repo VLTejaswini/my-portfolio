@@ -10,16 +10,21 @@ interface Certificate {
 const Certificates = forwardRef<HTMLElement>((props, ref) => {
   const [certificates, setCertificates] = useState<Certificate[]>([
     {
-      title: "1st Semester Marks Sheet",
-      image: "certificates/vvit_sem1.jpg",
-      category: "1st Year - VVIT Marks Sheets"
+      title: "1-1 Marks Sheet",
+      image: "/certificates/1-1.jpg",
+      category: "VVIT Marks Sheets"
     },
     {
-      title: "2nd Semester Marks Sheet",
-      image: "certificates/vvit_sem2.jpg",
-      category: "1st Year - VVIT Marks Sheets"
+      title: "1-2 Marks Sheet",
+      image: "/certificates/1-2.jpg",
+      category: "VVIT Marks Sheets"
+    },
+    {
+      title: "2-1 Marks Sheet",
+      image: "/certificates/2-1.jpg",
+      category: "VVIT Marks Sheets"
     }
-  ]), index) => (
+  ]); index) => (
             <a
               key={index}
               href={info.link}
