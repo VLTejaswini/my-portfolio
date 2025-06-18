@@ -164,7 +164,6 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
           )}
         </div>
         
-        {/* Categorized Certificate Upload Areas */}
         <div className="space-y-6">
           <h3 className="font-bold text-brown-800 text-xl mb-4 flex items-center">
             <FolderOpen className="w-6 h-6 mr-2" />
@@ -197,7 +196,6 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
                 </CollapsibleTrigger>
                 
                 <CollapsibleContent className="px-4 pb-4">
-                  {/* Upload Area for this category - supports multiple files */}
                   <label className="flex flex-col items-center justify-center gap-3 bg-brown-50 hover:bg-brown-100 text-brown-700 p-6 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-brown-300 mb-4">
                     <Upload className="w-6 h-6" />
                     <div className="text-center">
@@ -213,7 +211,6 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
                     />
                   </label>
 
-                  {/* Files in this category */}
                   {category.files.length > 0 && (
                     <div className="space-y-3">
                       {category.files.map((file) => (
@@ -223,7 +220,7 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
                             <div>
                               <p className="font-medium text-brown-800">{file.name}</p>
                               <p className="text-xs text-brown-500">
-                                {file.type.split('/')[1].toUpperCase()} • Uploaded: {file.uploadDate}
+                                {file.type.split('/')[1]?.toUpperCase() || 'FILE'} • Uploaded: {file.uploadDate}
                               </p>
                             </div>
                           </div>
