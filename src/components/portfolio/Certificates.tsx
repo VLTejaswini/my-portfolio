@@ -1,8 +1,9 @@
 
 import React, { forwardRef, useState } from 'react';
-import { Upload, Award, Download, Trash2, Eye, Edit2, Save, X, Plus, FileText } from 'lucide-react';
+import { Upload, Award, Download, Trash2, Eye, Edit2, Save, X, Plus, FileText, FolderOpen } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
 interface Certificate {
   id: string;
@@ -17,6 +18,13 @@ interface CertificateFile {
   url: string;
   type: string;
   uploadDate: string;
+}
+
+interface CertificateCategory {
+  id: string;
+  name: string;
+  files: CertificateFile[];
+  isOpen: boolean;
 }
 
 const Certificates = forwardRef<HTMLElement>((props, ref) => {
@@ -42,12 +50,38 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
     }
   ]);
 
-  const [certificateFiles, setCertificateFiles] = useState<CertificateFile[]>([]);
+  const [categories, setCategories] = useState<CertificateCategory[]>([
+    {
+      id: '1',
+      name: 'VVIT Mark Sheets',
+      files: [],
+      isOpen: true
+    },
+    {
+      id: '2',
+      name: 'Professional Certifications',
+      files: [],
+      isOpen: false
+    },
+    {
+      id: '3',
+      name: 'Course Certificates',
+      files: [],
+      isOpen: false
+    },
+    {
+      id: '4',
+      name: 'Achievement Awards',
+      files: [],
+      isOpen: false
+    }
+  ]);
+
   const [editCertificates, setEditCertificates] = useState(certificates);
 
   React.useEffect(() => {
     const saved = localStorage.getItem('portfolioCertificates');
-    const savedFiles = localStorage.getItem('portfolioCertificateFiles');
+    const savedCategories = localStorage.getItem('portfolioCertificateCategories');
     
     if (saved) {
       const parsedData = JSON.parse(saved);
@@ -55,16 +89,16 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
       setEditCertificates(parsedData);
     }
     
-    if (savedFiles) {
-      const parsedFiles = JSON.parse(savedFiles);
-      setCertificateFiles(parsedFiles);
+    if (savedCategories) {
+      const parsedCategories = JSON.parse(savedCategories);
+      setCategories(parsedCategories);
     }
   }, []);
 
   const handleSave = () => {
     setCertificates(editCertificates);
     localStorage.setItem('portfolioCertificates', JSON.stringify(editCertificates));
-    localStorage.setItem('portfolioCertificateFiles', JSON.stringify(certificateFiles));
+    localStorage.setItem('portfolioCertificateCategories', JSON.stringify(categories));
     setIsEditing(false);
   };
 
@@ -93,7 +127,7 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
     setEditCertificates(prev => prev.filter(cert => cert.id !== id));
   };
 
-  const handleMultipleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCategoryFileUpload = (categoryId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
 
@@ -105,14 +139,27 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
       uploadDate: new Date().toLocaleDateString()
     }));
 
-    setCertificateFiles(prev => [...prev, ...newFiles]);
-    localStorage.setItem('portfolioCertificateFiles', JSON.stringify([...certificateFiles, ...newFiles]));
+    setCategories(prev => prev.map(category => 
+      category.id === categoryId 
+        ? { ...category, files: [...category.files, ...newFiles] }
+        : category
+    ));
   };
 
-  const removeFile = (fileId: string) => {
-    const updatedFiles = certificateFiles.filter(file => file.id !== fileId);
-    setCertificateFiles(updatedFiles);
-    localStorage.setItem('portfolioCertificateFiles', JSON.stringify(updatedFiles));
+  const removeFileFromCategory = (categoryId: string, fileId: string) => {
+    setCategories(prev => prev.map(category => 
+      category.id === categoryId 
+        ? { ...category, files: category.files.filter(file => file.id !== fileId) }
+        : category
+    ));
+  };
+
+  const toggleCategory = (categoryId: string) => {
+    setCategories(prev => prev.map(category => 
+      category.id === categoryId 
+        ? { ...category, isOpen: !category.isOpen }
+        : category
+    ));
   };
 
   const viewFile = (file: CertificateFile) => {
@@ -169,71 +216,92 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
           )}
         </div>
         
-        {/* Certificate Upload Area */}
-        <div className="portfolio-card mb-8">
-          <h3 className="font-bold text-brown-800 text-lg mb-4 flex items-center">
-            <Upload className="w-5 h-5 mr-2" />
-            Upload Certificate Files
+        {/* Categorized Certificate Upload Areas */}
+        <div className="space-y-6 mb-8">
+          <h3 className="font-bold text-brown-800 text-xl mb-4 flex items-center">
+            <FolderOpen className="w-6 h-6 mr-2" />
+            Certificate Categories
           </h3>
           
-          <label className="flex flex-col items-center justify-center gap-4 bg-brown-100 hover:bg-brown-200 text-brown-700 p-8 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-brown-300 mb-6">
-            <Upload className="w-8 h-8" />
-            <div className="text-center">
-              <p className="font-medium">Click to upload certificate files</p>
-              <p className="text-sm text-brown-500">Select multiple PDF, JPG, PNG files</p>
-            </div>
-            <input
-              type="file"
-              onChange={handleMultipleFileUpload}
-              className="hidden"
-              accept=".pdf,.jpg,.jpeg,.png,.gif"
-              multiple
-            />
-          </label>
-
-          {/* Uploaded Files Display */}
-          {certificateFiles.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="font-semibold text-brown-800">Uploaded Certificate Files</h4>
-              {certificateFiles.map((file) => (
-                <div key={file.id} className="bg-brown-50 p-4 rounded-lg flex items-center justify-between">
+          {categories.map((category) => (
+            <div key={category.id} className="portfolio-card">
+              <Collapsible open={category.isOpen} onOpenChange={() => toggleCategory(category.id)}>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 text-left hover:bg-brown-50 rounded-lg transition-colors">
                   <div className="flex items-center space-x-3">
-                    <FileText className="w-5 h-5 text-brown-600" />
-                    <div>
-                      <p className="font-medium text-brown-800">{file.name}</p>
-                      <p className="text-xs text-brown-500">
-                        {file.type.split('/')[1].toUpperCase()} • Uploaded: {file.uploadDate}
-                      </p>
+                    <FolderOpen className="w-5 h-5 text-brown-600" />
+                    <h4 className="font-semibold text-brown-800 text-lg">{category.name}</h4>
+                    <span className="text-sm text-brown-500 bg-brown-100 px-2 py-1 rounded-full">
+                      {category.files.length} files
+                    </span>
+                  </div>
+                  <div className="text-brown-400">
+                    {category.isOpen ? '−' : '+'}
+                  </div>
+                </CollapsibleTrigger>
+                
+                <CollapsibleContent className="px-4 pb-4">
+                  {/* Upload Area for this category */}
+                  <label className="flex flex-col items-center justify-center gap-3 bg-brown-50 hover:bg-brown-100 text-brown-700 p-6 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-brown-300 mb-4">
+                    <Upload className="w-6 h-6" />
+                    <div className="text-center">
+                      <p className="font-medium">Upload files to {category.name}</p>
+                      <p className="text-sm text-brown-500">Select multiple PDF, JPG, PNG files</p>
                     </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => viewFile(file)}
-                      className="text-brown-600 hover:text-brown-800 transition-colors p-2"
-                      title="View"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <a
-                      href={file.url}
-                      download={file.name}
-                      className="text-brown-600 hover:text-brown-800 transition-colors p-2"
-                      title="Download"
-                    >
-                      <Download className="w-4 h-4" />
-                    </a>
-                    <button
-                      onClick={() => removeFile(file.id)}
-                      className="text-red-600 hover:text-red-800 transition-colors p-2"
-                      title="Remove"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                    <input
+                      type="file"
+                      onChange={(e) => handleCategoryFileUpload(category.id, e)}
+                      className="hidden"
+                      accept=".pdf,.jpg,.jpeg,.png,.gif"
+                      multiple
+                    />
+                  </label>
+
+                  {/* Files in this category */}
+                  {category.files.length > 0 && (
+                    <div className="space-y-3">
+                      {category.files.map((file) => (
+                        <div key={file.id} className="bg-white p-4 rounded-lg border border-brown-200 flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <FileText className="w-5 h-5 text-brown-600" />
+                            <div>
+                              <p className="font-medium text-brown-800">{file.name}</p>
+                              <p className="text-xs text-brown-500">
+                                {file.type.split('/')[1].toUpperCase()} • Uploaded: {file.uploadDate}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => viewFile(file)}
+                              className="text-brown-600 hover:text-brown-800 transition-colors p-2"
+                              title="View"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <a
+                              href={file.url}
+                              download={file.name}
+                              className="text-brown-600 hover:text-brown-800 transition-colors p-2"
+                              title="Download"
+                            >
+                              <Download className="w-4 h-4" />
+                            </a>
+                            <button
+                              onClick={() => removeFileFromCategory(category.id, file.id)}
+                              className="text-red-600 hover:text-red-800 transition-colors p-2"
+                              title="Remove"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
             </div>
-          )}
+          ))}
         </div>
         
         {/* Certificate Details */}
