@@ -53,7 +53,7 @@ const Footer = () => {
         
         <div className="border-t border-brown-700 mt-8 pt-8 text-center text-brown-200">
           <p className="flex items-center justify-center gap-2">
-            Made with <Heart className="w-4 h-4 text-red-400" /> by John Doe
+            Made with <Heart className="w-4 h-4 text-red-400" /> by lakshmi tejaswini
           </p>
           <p className="mt-2 text-sm">
             © {new Date().getFullYear()} All rights reserved.
