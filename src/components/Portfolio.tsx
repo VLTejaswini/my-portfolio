@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Navigation from './portfolio/Navigation';
 import HeroSection from './portfolio/HeroSection';
@@ -7,7 +6,6 @@ import Skills from './portfolio/Skills';
 import Experience from './portfolio/Experience';
 import Projects from './portfolio/Projects';
 import Certificates from './portfolio/Certificates';
-import Achievements from './portfolio/Achievements';
 import Resume from './portfolio/Resume';
 import Contact from './portfolio/Contact';
 import Footer from './portfolio/Footer';
@@ -32,7 +30,6 @@ const Portfolio = () => {
     experience: useRef<HTMLElement>(null),
     projects: useRef<HTMLElement>(null),
     certificates: useRef<HTMLElement>(null),
-    achievements: useRef<HTMLElement>(null),
     resume: useRef<HTMLElement>(null),
     contact: useRef<HTMLElement>(null),
   };
@@ -87,7 +84,6 @@ const Portfolio = () => {
           profileData={portfolioData}
         />
         <Certificates ref={sectionRefs.certificates} />
-        <Achievements ref={sectionRefs.achievements} />
         <Resume ref={sectionRefs.resume} />
         <Contact ref={sectionRefs.contact} />
       </main>

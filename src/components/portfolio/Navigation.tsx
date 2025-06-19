@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
@@ -16,7 +15,6 @@ const Navigation: React.FC<NavigationProps> = ({ scrollToSection }) => {
     { key: 'experience', label: 'Experience' },
     { key: 'projects', label: 'Projects' },
     { key: 'certificates', label: 'Certificates' },
-    { key: 'achievements', label: 'Achievements' },
     { key: 'resume', label: 'Resume' },
     { key: 'contact', label: 'Contact' },
   ];
