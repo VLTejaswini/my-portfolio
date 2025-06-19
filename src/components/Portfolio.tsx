@@ -34,27 +34,27 @@ const Portfolio = () => {
     certificates: [
       {
         id: '1',
-        title: "1-1 Marks Sheet",
-        image: "/certificates/1-1.jpg",
-        category: "VVIT Marks Sheets",
+        title: "1-1 Semester Grade Card",
+        image: "/lovable-uploads/4825b03f-15f2-4783-beaf-f42842db944f.png",
+        category: "VVIT Academic Records",
         issuer: "VVIT University",
-        date: "2023"
+        date: "February 2024"
       },
       {
         id: '2',
-        title: "1-2 Marks Sheet",
-        image: "/certificates/1-2.jpg",
-        category: "VVIT Marks Sheets",
+        title: "1-2 Semester Grade Card", 
+        image: "/lovable-uploads/094e6246-e13a-4b7b-92be-4855630e0a1d.png",
+        category: "VVIT Academic Records",
         issuer: "VVIT University",
-        date: "2023"
+        date: "July 2024"
       },
       {
         id: '3',
-        title: "2-1 Marks Sheet",
-        image: "/certificates/2-1.jpg",
-        category: "VVIT Marks Sheets",
-        issuer: "VVIT University",
-        date: "2024"
+        title: "2-1 Semester Grade Card",
+        image: "/lovable-uploads/6af296c0-d80f-4371-82d0-958eb90e5770.png",
+        category: "VVIT Academic Records",
+        issuer: "VVIT University", 
+        date: "December 2024"
       }
     ]
   });
