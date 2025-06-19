@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import Navigation from './portfolio/Navigation';
 import HeroSection from './portfolio/HeroSection';
@@ -79,10 +80,7 @@ const Portfolio = () => {
           updateSkills={(skills) => updatePortfolioData({ skills })}
         />
         <Experience ref={sectionRefs.experience} />
-        <Projects 
-          ref={sectionRefs.projects}
-          profileData={portfolioData}
-        />
+        <Projects ref={sectionRefs.projects} />
         <Certificates ref={sectionRefs.certificates} />
         <Resume ref={sectionRefs.resume} />
         <Contact ref={sectionRefs.contact} />
