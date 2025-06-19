@@ -1,4 +1,3 @@
-
 import React, { forwardRef, useState } from 'react';
 import { Camera, Edit, Sparkles, Code, Coffee } from 'lucide-react';
 
@@ -10,21 +9,24 @@ interface ProfileData {
 
 interface HeroSectionProps {
   profileData: ProfileData;
-  setProfileData: (data: ProfileData) => void;
+  setProfileData: (data: any) => void;
 }
 
 const HeroSection = forwardRef<HTMLElement, HeroSectionProps>(({ profileData, setProfileData }, ref) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState(profileData);
+  const [editData, setEditData] = useState({
+    name: profileData.name,
+    bio: profileData.bio,
+    profileImage: profileData.profileImage
+  });
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const newData = { ...profileData, profileImage: e.target?.result as string };
-        setProfileData(newData);
-        localStorage.setItem('portfolioProfile', JSON.stringify(newData));
+        const newImage = e.target?.result as string;
+        setProfileData({ profileImage: newImage });
       };
       reader.readAsDataURL(file);
     }
@@ -32,12 +34,15 @@ const HeroSection = forwardRef<HTMLElement, HeroSectionProps>(({ profileData, se
 
   const handleSave = () => {
     setProfileData(editData);
-    localStorage.setItem('portfolioProfile', JSON.stringify(editData));
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditData(profileData);
+    setEditData({
+      name: profileData.name,
+      bio: profileData.bio,
+      profileImage: profileData.profileImage
+    });
     setIsEditing(false);
   };
 
