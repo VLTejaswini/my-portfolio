@@ -1,4 +1,13 @@
 
+interface Certificate {
+  id: string;
+  title: string;
+  image: string;
+  category: string;
+  issuer?: string;
+  date?: string;
+}
+
 interface PortfolioData {
   name: string;
   bio: string;
@@ -8,6 +17,7 @@ interface PortfolioData {
   batch: string;
   school: string;
   skills: string[];
+  certificates: Certificate[];
 }
 
 export const encodePortfolioData = (data: PortfolioData): string => {

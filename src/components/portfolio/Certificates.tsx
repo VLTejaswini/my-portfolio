@@ -13,37 +13,20 @@ interface Certificate {
   date?: string;
 }
 
-const Certificates = forwardRef<HTMLElement>((props, ref) => {
+interface CertificatesProps {
+  certificates: Certificate[];
+  updateCertificates: (certificates: Certificate[]) => void;
+}
+
+const Certificates = forwardRef<HTMLElement, CertificatesProps>(({ certificates, updateCertificates }, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [viewingCertificate, setViewingCertificate] = useState<Certificate | null>(null);
-  const [certificates, setCertificates] = useState<Certificate[]>([
-    {
-      id: '1',
-      title: "1-1 Marks Sheet",
-      image: "/certificates/1-1.jpg",
-      category: "VVIT Marks Sheets",
-      issuer: "VVIT University",
-      date: "2023"
-    },
-    {
-      id: '2',
-      title: "1-2 Marks Sheet",
-      image: "/certificates/1-2.jpg",
-      category: "VVIT Marks Sheets",
-      issuer: "VVIT University",
-      date: "2023"
-    },
-    {
-      id: '3',
-      title: "2-1 Marks Sheet",
-      image: "/certificates/2-1.jpg",
-      category: "VVIT Marks Sheets",
-      issuer: "VVIT University",
-      date: "2024"
-    }
-  ]);
-
   const [editCertificates, setEditCertificates] = useState(certificates);
+
+  // Update editCertificates when certificates prop changes
+  React.useEffect(() => {
+    setEditCertificates(certificates);
+  }, [certificates]);
 
   const handleImageUpload = (certId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -82,7 +65,7 @@ const Certificates = forwardRef<HTMLElement>((props, ref) => {
   };
 
   const handleSave = () => {
-    setCertificates(editCertificates);
+    updateCertificates(editCertificates);
     setIsEditing(false);
   };
 

@@ -12,6 +12,15 @@ import Contact from './portfolio/Contact';
 import Footer from './portfolio/Footer';
 import { updateURL, getDataFromURL } from '../utils/urlState';
 
+interface Certificate {
+  id: string;
+  title: string;
+  image: string;
+  category: string;
+  issuer?: string;
+  date?: string;
+}
+
 const Portfolio = () => {
   const [portfolioData, setPortfolioData] = useState({
     name: "John Doe",
@@ -21,7 +30,33 @@ const Portfolio = () => {
     college: "VVIT University",
     batch: "2023 – 2027",
     school: "Kennedy School, Passed out: 2021",
-    skills: ["HTML", "Python", "SQL", "CSS", "Java"]
+    skills: ["HTML", "Python", "SQL", "CSS", "Java"],
+    certificates: [
+      {
+        id: '1',
+        title: "1-1 Marks Sheet",
+        image: "/certificates/1-1.jpg",
+        category: "VVIT Marks Sheets",
+        issuer: "VVIT University",
+        date: "2023"
+      },
+      {
+        id: '2',
+        title: "1-2 Marks Sheet",
+        image: "/certificates/1-2.jpg",
+        category: "VVIT Marks Sheets",
+        issuer: "VVIT University",
+        date: "2023"
+      },
+      {
+        id: '3',
+        title: "2-1 Marks Sheet",
+        image: "/certificates/2-1.jpg",
+        category: "VVIT Marks Sheets",
+        issuer: "VVIT University",
+        date: "2024"
+      }
+    ]
   });
 
   const sectionRefs = {
@@ -50,6 +85,10 @@ const Portfolio = () => {
 
   const updatePortfolioData = (updates: Partial<typeof portfolioData>) => {
     setPortfolioData(prev => ({ ...prev, ...updates }));
+  };
+
+  const updateCertificates = (certificates: Certificate[]) => {
+    updatePortfolioData({ certificates });
   };
 
   const scrollToSection = (sectionKey: keyof typeof sectionRefs) => {
@@ -81,7 +120,11 @@ const Portfolio = () => {
         />
         <Experience ref={sectionRefs.experience} />
         <Projects ref={sectionRefs.projects} />
-        <Certificates ref={sectionRefs.certificates} />
+        <Certificates 
+          ref={sectionRefs.certificates}
+          certificates={portfolioData.certificates}
+          updateCertificates={updateCertificates}
+        />
         <Resume ref={sectionRefs.resume} />
         <Contact ref={sectionRefs.contact} />
       </main>
