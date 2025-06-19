@@ -39,7 +39,7 @@ const HeroSection = forwardRef<HTMLElement>((props, ref) => {
         {/* Name and Bio (STATIC) */}
         <div className="relative z-10">
           <h1 className="text-5xl md:text-7xl font-bold text-white drop-shadow-2xl tracking-tight">
-            Lakshmi Tejaswini
+          Vuddanti Lakshmi Tejaswini
           </h1>
           <div className="w-24 h-0.5 mx-auto mt-2 bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
 
